@@ -125,7 +125,7 @@ d20_faces = [
 [1,11,3], //face20
 ];
 
-module poly_with_text (points, faces, draw=true, draw_points=false, draw_text=false, text_depth=.2) {
+module poly_with_text (points, faces, draw=true, draw_points=false, draw_text=false, text_depth=.2, font=undef) {
 	if (draw_points)
 		for (point=[0:1:len(points)-1])
 			translate(points[point]) linear_extrude(height=.1) text(text=str(point), size=.5, halign="center", valign="center");
@@ -142,9 +142,9 @@ module poly_with_text (points, faces, draw=true, draw_points=false, draw_text=fa
 				translate(face_center*(1-text_depth))
 				rotate([0,inclination_angle(face_center), azimuthal_angle(face_center)])
 				if ((face+1==6) && len(faces)>6) //only print a dot on the 6 if the die is a d8 or higher.
-					linear_extrude(text_depth+.5) text(str(face+1,"."), size=1, valign="center", halign="center");
+					linear_extrude(text_depth+.5) text(str(face+1,"."), size=1, valign="center", halign="center", font=font);
 				else
-					linear_extrude(text_depth+.5) text(str(face+1), size=1, valign="center", halign="center");
+					linear_extrude(text_depth+.5) text(str(face+1), size=1, valign="center", halign="center", font=font);
 
 			}
 		}
