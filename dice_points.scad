@@ -1,5 +1,8 @@
-include <lib/vector_math.scad>
-include <lib/dice_shapes.scad>
+include <dice.scad>
+type=d20; // d4, d6, d8, d10, d12, d20
+text_depth=.1;
+draw_text=true;
+font="DejaVu Sans";
+percent=false; //change to true for percent d10
 
-
-poly_with_text(d4_points, d4_faces, draw_center=true);
+dice(poly=type, draw_text=draw_text, text_depth=text_depth, font=font, percent=percent);
