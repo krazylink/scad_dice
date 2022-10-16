@@ -1,10 +1,14 @@
-include <constants.scad>
-include <trig.scad>
-include <vector.scad>
-include <indicator.scad>
-
-
-d4= [
+function vector_sum(v) = _vector_sum(v, v[0]*0);
+function _vector_sum(v, _total, _i=0) = _i>=len(v) ? _total : _vector_sum(v, _total+v[_i], _i+1);
+function mean(v) = vector_sum(v)/len(v);
+function inclination_angle(v) = acos(v[2]/norm(v));
+function azimuthal_angle(v) = atan2(v[1],v[0]);
+function csc(x) = 1/sin(x);
+function cot(x) = cos(x)/sin(x);
+function sec(x) = 1/cos(x);
+function rtod(x) = x*(180/PI);
+function dtor(x) = x*(PI/180);
+PHI=((1+sqrt(5))/2);d4= [
 	//points
 	[[1,1,1], //0
 	[1,-1,-1], //1
@@ -215,3 +219,4 @@ module dice (poly=d4, draw=true, draw_points=false, draw_text=false, text_depth=
 		}
 	}
 }
+
