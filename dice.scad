@@ -166,9 +166,12 @@ module dice (poly=d4, draw=true, draw_points=false, draw_text=false, text_depth=
 				n=len(poly[1][face]);
 				
 				if (poly==d4)
-					translate(center-[sign(center.x)*text_depth/2,sign(center.y)*text_depth/2, sign(center.z)*text_depth/2])
+					translate(center)
 					rotate([0,inclination_angle(center), azimuthal_angle(center)])
-					rotate(360/n-(90*sign(center.z))) linear_extrude(text_depth*2) text(str(face+1), size=.9, valign="center", halign="center", font=font);
+					for(i=[30:360/n:360])
+						rotate(i*sign(center.z))
+						translate([0,.8,-text_depth])
+							linear_extrude(text_depth*2) text(str(face+1), size=.5, valign="center", halign="center", font=font);
 				else if (poly==d10) {
 					translate(center-[sign(center.x)*text_depth/2,sign(center.y)*text_depth/2, sign(center.z)*text_depth/2])
 					if (percent) {
