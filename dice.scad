@@ -8,17 +8,25 @@ function cot(x) = cos(x)/sin(x);
 function sec(x) = 1/cos(x);
 function rtod(x) = x*(180/PI);
 function dtor(x) = x*(PI/180);
-PHI=((1+sqrt(5))/2);d4= [
+function angleBetweenVectors(a,b) = acos((a*b)/(norm(a)*norm(b)));
+
+PHI=((1+sqrt(5))/2);
+
+d4= [
 	//points
-	[[1,1,1], //0
+	[
+	[1,1,1], //0
+	[-1,-1,1], //3
 	[1,-1,-1], //1
-	[-1,1,-1], //2
-	[-1,-1,1]], //3
+	[-1,1,-1],
+],
 	//faces
-	[[0,1,3], //face1
-	[0,3,2], //face2
+	[
 	[0,2,1], //face3
-	[1,2,3]] //face3
+	[1,3,0], //face1
+	[2,0,3], //face2
+	[3,1,2], //face3
+	],
 ];
 
 d6 = [
@@ -169,13 +177,17 @@ module dice (poly=d4, draw=true, draw_points=false, draw_text=false, text_depth=
 				center = mean(points);
 				n=len(poly[1][face]);
 				
-				if (poly==d4)
-					translate(center)
-					rotate([0,inclination_angle(center), azimuthal_angle(center)])
-					for(i=[30:360/n:360])
-						rotate(i*sign(center.z))
-						translate([0,.8,-text_depth])
-							linear_extrude(text_depth*2) text(str(face+1), size=.5, valign="center", halign="center", font=font);
+				if (poly==d4) {
+					translate(points[0])
+					rotate(-azimuthal_angle(points[0]))
+					rotate([-inclination_angle(points[0])*sign(points[0].z),0,0])
+					for (i=[0:360/n:360-1])
+						rotate(i)
+						rotate([70,0,60])
+						translate([0,-.6,-text_depth/2])
+						linear_extrude(.1) text(str(face+1), valign="center", halign="center", size=.4, font=font);
+				}
+
 				else if (poly==d10) {
 					translate(center-[sign(center.x)*text_depth/2,sign(center.y)*text_depth/2, sign(center.z)*text_depth/2])
 					if (percent) {
