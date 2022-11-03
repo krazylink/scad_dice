@@ -9,6 +9,9 @@ function sec(x) = 1/cos(x);
 function rtod(x) = x*(180/PI);
 function dtor(x) = x*(PI/180);
 function angleBetweenVectors(a,b) = acos((a*b)/(norm(a)*norm(b)));
+function rotZ (theta,p) = [[cos(theta),sin(theta),0],[-sin(theta), cos(theta),0],[0,0,1]]*p;
+function rotX (theta,p) = [[cos(theta),0,sin(theta)],[0,1,1],[-sin(theta),0,cos(theta)]]*p;
+function rotY (theta,p) = [[cos(theta),0,sin(theta)],[0,1,0],[-sin(theta),0,cos(theta)]]*p;
 
 PHI=((1+sqrt(5))/2);
 
@@ -91,18 +94,18 @@ d12 = [
 	[-PHI, 0, (1/PHI)], //18
 	[-PHI, 0, -(1/PHI)]], //19
 	//faces
-	[[8,0,16,1,10], //face1
-	[10,1,13,15,5], //face2
-	[8,10,5,18,4], //face3
-	[8,4,14,12,0], //face4
-	[16,0,12,2,17], //face5
-	[1,16,17,3,13], //face6
+	[[16,1,10,8,0], //face1
+	[13,15,5,10,1], //face2
+	[5,18,4,8,10], //face3
+	[4,14,12,0,8], //face4
+	[12,2,17,16,0], //face5
+	[17,3,13,1,16], //face6
 	[19,7,11,9,6], //face7
-	[13,3,11,7,15], //face8
-	[17,2,9,11,3], //face9
-	[14,6,9,2,12], //face10
-	[4,18,19,6,14], //face11
-	[5,15,7,19,18]], //face12
+	[15,13,3,11,7], //face8
+	[3,17,2,9,11], //face9
+	[2,12,14,6,9,], //face10
+	[14,4,18,19,6], //face11
+	[18,5,15,7,19]], //face12
 ];
 
 d20 = [
@@ -120,29 +123,29 @@ d20 = [
 	[-PHI*1.7, 0, 1*1.7], //10
 	[-PHI*1.7, 0, -1*1.7]], //11
 	//face
-	[[0,8,2], //face1
+	[[8,2,0], //face1
 	[1,3,9], //face2
 	[11,7,3], //face3
-	[11,6,10], //face4
+	[10,11,6], //face4
 	[5,9,3], //face5
 	[4,6,1], //face6
 	[11,10,7], //face7
 	[8,9,5], //face8
 	[2,7,10], //face9
 	[1,6,11], //face10
-	[0,2,10], //face11
+	[8,5,2], //face11
 	[0,6,4], //face12
 	[5,3,7], //face13
 	[4,1,9], //face14
 	[2,5,7], //face15
 	[8,4,9], //face16
 	[0,10,6], //face17
-	[2,8,5], //face18
+	[0,2,10], //face18
 	[0,4,8], //face19
 	[1,11,3]], //face20
 ];
 
-amulti=1.5;
+amulti=1.8;
 n=5;
 a=((1/2)*csc(rtod(PI/n))); //radius of n-gon base points
 h=sqrt(4-sec(rtod(PI/(2*n)))^2)/(4+(8*cos(rtod(PI/n)))); //height of n-gon base points
@@ -170,12 +173,14 @@ module dice (poly=d4, draw=true, draw_points=false, draw_text=false, text_depth=
 			polyhedron(poly[0], poly[1]);
 		if (draw_points)
 			for (point=[0:1:len(poly[0])-1])
-				translate(poly[0][point]) linear_extrude(height=.1) text(text=str(point), size=.5, halign="center", valign="center");
+				color("blue") translate(poly[0][point]) linear_extrude(height=.1) text(text=str(point), size=.5, halign="center", valign="center");
 		if (draw_text) {
+			r = 90;
 			for (face=[0:1:len(poly[1])-1]) {
 				points = [for (i=[0:1:len(poly[1][face])-1]) poly[0][poly[1][face][i]]];
 				center = mean(points);
 				n=len(poly[1][face]);
+				rotated_points = rotY(-inclination_angle(center), rotZ(azimuthal_angle(center), points[0]-center));
 				
 				if (poly==d4) {
 					translate(points[0])
@@ -222,11 +227,30 @@ module dice (poly=d4, draw=true, draw_points=false, draw_text=false, text_depth=
 					if ((face+1)==6 && len(poly[1])>6)
 						translate(center-[sign(center.x)*text_depth,sign(center.y)*text_depth, sign(center.z)*text_depth])
 						rotate([0,inclination_angle(center), azimuthal_angle(center)])
-						rotate((90*sign(center.z))) linear_extrude(text_depth*2) text(str(face+1,"."), size=.9, valign="center", halign="center", spacing=.8, font=font);
+						{
+							if (sign(rotated_points.x) <=0 ) {
+								rotate(angleBetweenVectors([0,1,0], rotated_points))
+								linear_extrude(text_depth*2) text(str(face+1,"."), size=.9, valign="center", halign="center", spacing=.8, font=font);
+							}
+							else {
+								rotate(-angleBetweenVectors([0,1,0],rotated_points))
+								linear_extrude(text_depth*2) text(str(face+1,"."), size=.9, valign="center", halign="center", spacing=.8, font=font);
+							}
+						}
+
 					else
-						translate(center-[sign(center.x)*text_depth,sign(center.y)*text_depth, sign(center.z)*text_depth])
+						translate(center-[sign(center.x)*text_depth/2,sign(center.y)*text_depth/2, sign(center.z)*text_depth/2])
 						rotate([0,inclination_angle(center), azimuthal_angle(center)])
-						rotate((90*sign(center.z))) linear_extrude(text_depth*2) text(str(face+1), size=.9, valign="center", halign="center", font=font);
+						{
+							if (sign(rotated_points.x) <=0 ) {
+								rotate(angleBetweenVectors([0,1,0],rotY(inclination_angle(center), rotZ(azimuthal_angle(center),points[0]-center))))
+								linear_extrude(text_depth*2) text(str(face+1), size=.9, valign="center", halign="center", font=font);
+							}
+							else {
+								rotate(-angleBetweenVectors([0,1,0],rotY(inclination_angle(center), rotZ(azimuthal_angle(center),points[0]-center))))
+								linear_extrude(text_depth*2) text(str(face+1), size=.9, valign="center", halign="center", font=font);
+							}
+						}
 			}
 		}
 	}
